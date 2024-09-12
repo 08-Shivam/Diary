@@ -4,15 +4,18 @@ using System.IO;
 using Diary.Models;
 using Newtonsoft.Json;
 using System.Linq;
-namespace Diary.Pages
+using System.Data.SqlTypes;
+namespace Diary
 {
+
     public partial class Notepad : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            Clear(); // lblNote.Text
-            clear(); // lblCreate.Text
+
+
             lblDateTime.Text = DateTime.Now.ToString("F");
+
             if (Session["userid"] != null)
             {
                 lblDetail.Text = "Welcome to the Digital Diary: " + Session["email"].ToString();
@@ -20,11 +23,13 @@ namespace Diary.Pages
                 if (!IsPostBack)
                 {
                     BindFiles();
+                    Clear();
                 }
             }
             else
             {
-                Response.Redirect("Login.aspx");
+
+                Response.Redirect("Default.aspx");
             }
             emptyalert.Visible = false;
         }
@@ -44,15 +49,10 @@ namespace Diary.Pages
         {
             string rootPath = @"D:\Notepad_Diary\";
             DirectoryInfo dirInfo = new DirectoryInfo(rootPath);
-            if (!dirInfo.Exists) {
+            if (!dirInfo.Exists)
+            {
                 dirInfo.Create();
             }
-            //if (!System.IO.Directory.Exists(rootPath))
-            //{
-            //    System.IO.Directory.CreateDirectory(rootPath);
-            //}
-
-            //string fileName = lblCreate.Text + DateTime.Now.ToString("yyyy-MM-dd-HHmmss") + ".txt";
             string fileName = lblCreate.Text;
             if (string.IsNullOrWhiteSpace(fileName))
             {
@@ -92,16 +92,18 @@ namespace Diary.Pages
                 BindFiles();
 
                 Response.Write("<script>alert('File Saved Successfully as :" + fileName + "');</script>");
+                Clear();
             }
             catch (Exception ex)
             {
                 Response.Write("<script>alert('Error : " + ex.Message + "')</script>");
             }
-            Clear();
         }
-        void Clear()
+
+        private void Clear()
         {
             txtNote.Text = string.Empty;
+            lblCreate.Text = string.Empty;
         }
 
         protected void btnOpen_Click(object sender, EventArgs e)
@@ -115,19 +117,18 @@ namespace Diary.Pages
                 var filepath = model.Directories.Where(x => x.Id == id).Select(s => s.Path).First();
 
                 var str = File.ReadAllText(filepath);
-                var fileName= Path.GetFileNameWithoutExtension(filepath);
+                var fileName = Path.GetFileNameWithoutExtension(filepath);
 
                 txtNote.Text = str;
                 lblCreate.Text = fileName;
                 emptyalert.Visible = false;
                 Emptyelert(); //emptyalert.Text
-            } 
+            }
             catch (Exception ex)
             {
-                emptyalert.Text=(ex.Message);
+                emptyalert.Text = (ex.Message);
                 emptyalert.Visible = true;
                 Clear(); // lblNote.Text
-                clear(); // lblCreate.Text
             }
         }
         void Emptyelert()
@@ -182,24 +183,20 @@ namespace Diary.Pages
                 {
                     Response.Write("<script>alert('No files exist.')</script>");
                 }
+                Clear();
             }
             catch (Exception ex)
             {
                 Response.Write("<script>alert('Error: " + ex.Message + "')</script>");
             }
-            clear();
-            Clear();
         }
         protected void btnLogout_Click(object sender, EventArgs e)
         {
-            Session.Remove("email");
-            Session.RemoveAll();
-            Session.Abandon();
-            Response.Redirect("Login.aspx");
-        }
-        void clear()
-        {
-            lblCreate.Text = string.Empty;
+            if (Session["userid"] != null)
+            {
+                Session.Abandon();
+                Response.Redirect("Default.aspx");
+            }
         }
     }
 }

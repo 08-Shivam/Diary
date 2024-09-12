@@ -4,22 +4,23 @@ using System.Configuration;
 using Diary.Models;
 using Newtonsoft.Json;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Diary
 {
     public partial class Register : System.Web.UI.Page
     {
-        string cs = ConfigurationManager.ConnectionStrings["dbcs2"].ConnectionString;
         protected void Page_Load(object sender, EventArgs e)
         {
 
         }
 
+
         protected void Button1_Click(object sender, EventArgs e)
         {
             try
             {
-                string path = Server.MapPath("~/assets/data.json");
+                string path = Server.MapPath("/assets/data.json");
                 DataModel dataModel = new DataModel();
 
                 if (File.Exists(path))
@@ -46,7 +47,7 @@ namespace Diary
                 File.WriteAllText(path, output);
 
                 //lblMessage.Text = "You have successfully registered";
-                Response.Redirect("Login.aspx");
+                Response.Redirect("Default.aspx");
             }
             catch (Exception ex)
             {
